@@ -7,9 +7,9 @@ import { FIREBASE_AUTH } from './FirebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import Home from './src/screens/Home';
 import TaskForm from './src/screens/TaskForm';
-import { Provider } from 'react-redux';
-import store from './src/redux/store';
-
+import { Provider, useDispatch, useSelector } from 'react-redux';
+import store from './src/redux/store'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,7 +17,6 @@ const InsideStack = createNativeStackNavigator();
 
 function InsideLayout() {
   return (
-
       <InsideStack.Navigator>
         <InsideStack.Screen 
           name="My todos" 
@@ -34,7 +33,6 @@ function InsideLayout() {
             animation: 'slide_from_bottom'
           }}
         />
-
         <InsideStack.Screen 
           name="EditTask" 
           component={TaskForm}  
@@ -45,11 +43,10 @@ function InsideLayout() {
           }}
         />
       </InsideStack.Navigator>
-
   );
 }
 
-export default function App() {
+export const App = () => {
   // const user = useSelector(state => state.user);
   // const dispatch = useDispatch();
 
@@ -60,20 +57,34 @@ export default function App() {
   //   });
   //   }, []);
 
-    const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-    useEffect(() => {
-      const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
-        setUser(user);
-      });
-      return () => unsubscribe();
-    }, []);
+  useEffect(() => {
+  const checkUserCredentials = async () => {
+    const storedUserId = await AsyncStorage.getItem('userCredential');
+    console.log('storedUserId:', storedUserId); // Add logging here
+    setUserId(storedUserId);
+  };
+
+  const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
+    if (user) {
+      console.log('user.uid TUKKKKKKK:', user.uid); // Add logging here
+      setUserId(user.uid);
+    }
+  });
+
+  checkUserCredentials();
+
+  return () => unsubscribe();
+}, []);
+
+console.log('userId:', userId); // Add logging here
 
   return (
-
+    <Provider store={store}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName='Login'>
-          {user ? (
+          {userId ? (
             <Stack.Screen 
               name="InsideLayout" 
               component={InsideLayout} 
@@ -89,7 +100,8 @@ export default function App() {
           )}
         </Stack.Navigator>
       </NavigationContainer>
-
+      </Provider>
   );
 }
 
+export default App;

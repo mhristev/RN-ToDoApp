@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import ToDoTask from '../models/Task';
+import { addTask, updateTask } from '../redux/actions';
+import { AppDispatch } from '../redux/store';
+// import { addTask} from '../redux/tasks/taskActions';
 
 interface TaskFormProps {
     navigation: NavigationProp<any, any>;
@@ -9,10 +14,12 @@ interface TaskFormProps {
     updateTask?: (task: { id: number; title: string; details: string }) => void;
 }
 
-const TaskForm = ({ navigation, route, addTask, updateTask }: TaskFormProps) => {
-    const { task, mode} = route.params;
+const TaskForm = ({ navigation, route }: TaskFormProps) => {
+    const { userId, task, mode} = route.params as unknown as { userId: string; task?: { id: string; title: string; details: string; completed: boolean }; mode: 'edit' | 'create' };
     const [title, setTitle] = useState('');
     const [details, setDetails] = useState('');
+    const dispatch: AppDispatch = useDispatch();
+    console.log("TaskForm userId 11111", userId);
 
     useEffect(() => {
         if (mode === 'edit' && task) {
@@ -21,25 +28,41 @@ const TaskForm = ({ navigation, route, addTask, updateTask }: TaskFormProps) => 
         }
     }, [mode, task]);
 
-    const saveTask = () => {
+    const handleAddTask = (newTask: ToDoTask) => {
+        dispatch(addTask(newTask));
+    };
+
+    const handleEditTask = (updatedTask: ToDoTask) => {
+        dispatch(updateTask(updatedTask));
+    };
+
+    const saveTask = async () => {
         if (title && details) {
             if (mode === 'create') {
                 const newTask = {
-                    id: Date.now(), 
+                    id: Date.now().toString(), 
                     title: title,
                     details: details,
                     completed: false
                 };
-                addTask && addTask(newTask);  
+                handleAddTask(newTask);
+                
+                //await dispatch(addTask(userId, newTask));  // Use dispatch here
+                // addTask && addTask(newTask);  
             } else if (mode === 'edit') {
                 const updatedTask = { ...task, title, details };
-                updateTask && updateTask(updatedTask); 
+                console.log("Updated task", updatedTask);
+                handleEditTask(updatedTask);
+                // updateTask && updateTask(updatedTask); 
             }
-            navigation.goBack();  
+            if (navigation.canGoBack()) {
+                navigation.goBack();
+            }
         } else {
             alert('Please fill out both fields.');
         }
     };
+
 
 
     return (

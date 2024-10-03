@@ -1,8 +1,8 @@
-interface Task {
-    id: number;
+interface ToDoTask {
+    id: string;
     title: string;
     details: string;
     completed: boolean;
 }
 
-export default Task;
+export default ToDoTask;
