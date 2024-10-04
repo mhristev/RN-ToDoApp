@@ -1,16 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { addTask, deleteTask, fetch_tasks, markTaskAsCompleted, toggleTaskCompletion, updateTask } from "./actions"
-import ToDoTask from "../models/Task";
-
-
-export const fetchTasks = createAsyncThunk<ToDoTask[], void>(
-  'tasks/fetchTasks',
-  async (): Promise<ToDoTask[]> => {
-    console.log("tuk sam");
-    const tasks: ToDoTask[] = await fetch_tasks();
-    return tasks;
-  }
-);
+import { addTask, deleteTask, fetch_tasks, toggleTaskCompletion, updateTask } from "./tasks.actions"
+import ToDoTask from "../../models/Task";
 
 
 const initialState = {
@@ -25,7 +15,7 @@ const tasksSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-    .addCase(fetchTasks.fulfilled, (state, action: PayloadAction<ToDoTask[]>) => {
+    .addCase(fetch_tasks.fulfilled, (state, action: PayloadAction<ToDoTask[]>) => {
       state.tasks = action.payload;
     })
     .addCase(deleteTask.fulfilled, (state, action: PayloadAction<ToDoTask[]>) => {
@@ -47,6 +37,4 @@ const tasksSlice = createSlice({
   }
 });
 
-
-// Export the reducer, either as a default or named export
 export default tasksSlice.reducer;
