@@ -1,92 +1,77 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ActivityIndicator, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppDispatch, RootState } from '../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { signInUser, signUpUser } from '../redux/user/user.actions';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
     const [isRegister, setIsRegister] = useState(false);
-    const auth = FIREBASE_AUTH;
+    const dispatch: AppDispatch = useDispatch();
+    const { loading, error } = useSelector((state: RootState) => state.user);
 
+    const handleSignIn = () => {
+        dispatch(signInUser({ email, password }));
+    };
 
-    const signIn = async () => {
-        setLoading(true);
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            await AsyncStorage.setItem('userId', userCredential.user.uid);
-            
-        } catch (e) {
-            alert(e.message);
-            console.log(e);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const signUp = async () => {
-        setLoading(true);
-        try {
-            await createUserWithEmailAndPassword(auth, email, password);
-        } catch (e) {
-            console.log(e);
-        } finally {
-            setLoading(false);
-        }
-    }
+    const handleSignUp = () => {
+        dispatch(signUpUser({ email, password }));
+    };
 
     return (
         <View style={styles.container}>
-            <KeyboardAvoidingView behavior="padding">
-                <Text style={styles.title}>{isRegister ? 'Create account' : 'Log in'}</Text>
-                <TextInput 
-                    value={email} 
-                    style={styles.input} 
-                    placeholder="Email" 
-                    autoCapitalize='none' 
-                    onChangeText={(text) => setEmail(text)}
-                />
-                <TextInput 
-                    value={password} 
-                    style={styles.input} 
-                    placeholder="Password" 
-                    autoCapitalize='none' 
-                    onChangeText={(text) => setPassword(text)} 
-                    secureTextEntry={true}
-                />
-                {loading ? 
-                    <ActivityIndicator size="large" color="#0000ff" /> 
-                : 
-                    <>
-                        <TouchableOpacity 
-                            style={styles.button} 
-                            onPress={isRegister ? signUp : signIn}
-                        >
-                            <Text style={styles.buttonText}>{isRegister ? 'Sign Up' : 'Sign In'}</Text>
-                        </TouchableOpacity>
+        <KeyboardAvoidingView behavior="padding">
+            <Text style={styles.title}>{isRegister ? 'Create account' : 'Log in'}</Text>
+            <TextInput 
+                value={email} 
+                style={styles.input} 
+                placeholder="Email" 
+                autoCapitalize='none' 
+                onChangeText={setEmail}
+            />
+            <TextInput 
+                value={password} 
+                style={styles.input} 
+                placeholder="Password" 
+                autoCapitalize='none' 
+                onChangeText={setPassword} 
+                secureTextEntry={true}
+            />
+            {loading ? 
+                <ActivityIndicator size="large" color="#0000ff" /> 
+            : 
+                <>
+                    <TouchableOpacity 
+                        style={styles.button} 
+                        onPress={isRegister ? handleSignUp : handleSignIn}
+                    >
+                        <Text style={styles.buttonText}>{isRegister ? 'Sign Up' : 'Sign In'}</Text>
+                    </TouchableOpacity>
 
-                        <View style={styles.signupContainer}>
-                            {isRegister ? (
-                                <Text style={styles.signupText}>Already have an account?</Text>
-                            ) : (
-                                <Text style={styles.signupText}>No account?</Text>
-                            )}
-                            <TouchableOpacity onPress={() => setIsRegister(!isRegister)}>
-                                <Text style={styles.signupLink}>{isRegister ? ' Log in' : ' Sign up'}</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </>
-                }
-            </KeyboardAvoidingView>
-        </View>
-    )
+                    <View style={styles.signupContainer}>
+                        <Text style={styles.signupText}>{isRegister ? 'Already have an account?' : 'No account?'}</Text>
+                        <TouchableOpacity onPress={() => setIsRegister(!isRegister)}>
+                            <Text style={styles.signupLink}>{isRegister ? ' Log in' : ' Sign up'}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </>
+            }
+            {error && <Text style={styles.errorText}>{error}</Text>}
+        </KeyboardAvoidingView>
+    </View>
+        )
 }
 
 export default Login;
 
 const styles = StyleSheet.create({
+    errorText: {
+        color: 'red',
+        textAlign: 'center',
+        marginTop: 10,
+    },
     container: {
         flex: 1,
         justifyContent: 'center',

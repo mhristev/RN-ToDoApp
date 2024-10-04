@@ -2,19 +2,19 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const TaskItem = ({ item, navigation, updateTask, deleteTask, toggleTaskCompletion }) => (
+const TaskItem = ({ item, navigation, handleToggleTaskCompletion, handleDeleteTask, userId }) => (
     <View style={styles.taskItem}>
-        <TouchableOpacity onPress={() => navigation.navigate('EditTask', { task: item, mode: 'edit', updateTask, deleteTask })}>
+        <TouchableOpacity onPress={() => navigation.navigate('EditTask', { task: item, mode: 'edit', userId })}>
             <View style={styles.taskTextContainer}>
                 <Text style={[styles.taskTitle, item.completed && styles.taskTitleCompleted]}>
                     {item.title}
                 </Text>
-                <Text style={styles.taskId}>{item.id}</Text>
+                <Text style={styles.taskId}>{item.details}</Text>
             </View>
         </TouchableOpacity>
-        
+
         <View style={styles.buttonContainer}>
-            <TouchableOpacity onPress={() => toggleTaskCompletion(item.id)}>
+            <TouchableOpacity onPress={() => handleToggleTaskCompletion(item.id, item.completed)} >
                 {item.completed ? (
                     <Ionicons name="checkmark-circle" size={24} color="green" />
                 ) : (
@@ -22,7 +22,7 @@ const TaskItem = ({ item, navigation, updateTask, deleteTask, toggleTaskCompleti
                 )}
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => deleteTask(item.id)}>
+            <TouchableOpacity onPress={() => handleDeleteTask(item.id)}>
                 <Ionicons name="trash-outline" size={24} color="red" style={styles.deleteIcon} />
             </TouchableOpacity>
         </View>
@@ -33,7 +33,7 @@ export default TaskItem;
 
 const styles = StyleSheet.create({
     taskItem: {
-        flexDirection: 'row',  
+        flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: '#f9f9f9',
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     },
     taskTextContainer: {
         flexDirection: 'column',
-        flex: 1,  
+        flex: 1,
     },
     taskTitle: {
         fontSize: 16,
@@ -58,5 +58,12 @@ const styles = StyleSheet.create({
     taskId: {
         fontSize: 12,
         color: 'gray',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    deleteIcon: {
+        marginLeft: 10,
     },
 });

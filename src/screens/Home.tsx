@@ -1,192 +1,64 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator, Button } from 'react-native';
-import { NavigationProp } from '@react-navigation/native';
-import { FIREBASE_AUTH } from '../../FirebaseConfig';
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import ToDoTask from '../models/Task';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { FIREBASE_DB } from '../../FirebaseConfig';  // Assuming you have Firebase configured like this
-import { collection, getDocs } from 'firebase/firestore'; // Firestore functions
 import { useDispatch, useSelector } from 'react-redux';
-import { addTask, deleteTask, fetch_tasks, toggleTaskCompletion } from '../redux/actions';
+import { deleteTask, fetch_tasks, toggleTaskCompletion } from '../redux/tasks/tasks.actions';
 import { AppDispatch, RootState } from '../redux/store';
-import { fetchTasks } from '../redux/tasksSlice';
+import { logoutUser } from '../redux/user/user.actions';
+import TaskItem from '../components/TaskItem';
 interface RouterProps {
     navigation: NavigationProp<any, any>;
+    route: RouteProp<any, any>;
 }
 
-const Home = ({ navigation }: RouterProps) => {
-    const [userId, setUserId] = useState(null); // Add this line
-
-    // const [tasks, setTasks] = useState<Task[]>([
-    //     { id: 1, title: 'test task 1', details: 'Details for task 1', completed: true },
-    //     { id: 2, title: 'Task 2', details: 'Details for task 2', completed: false },
-    //     { id: 3, title: 'Task 3', details: 'Details for task 3', completed: false },
-    //     { id: 4, title: 'Task 4', details: 'Details for task 4', completed: false },
-    // ]);
-
-    // const addTask = (task: Task) => {
-    //     setTasks([...tasks, task]);
-    // };
-
-    // const updateTask = (updatedTask: Task) => {
-    //     setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
-    // };
-
-    // const deleteTask = (taskId: number) => {
-    //     setTasks(tasks.filter(task => task.id !== taskId));  
-    // };
-
-    // const toggleTaskCompletion = (id: number) => {
-    //     setTasks(tasks.map(task =>
-    //         task.id === id ? { ...task, completed: !task.completed } : task
-    //     ));
-    // };
-
-    // const [tasks, setTasks] = useState<ToDoTask[]>([]);  // Start with an empty array
-    // const dispatch = useDispatch();
-
-    // // const { tasks, loading, error } = useAppSelector((state) => state.tasks);
-    // const {tasks } = useSelector((state: RootState ) => state.task);
-
-    // useEffect(() => {
-    //     const fetchUserTasks = async () => {
-    //       const userId = await AsyncStorage.getItem('userId');  // Assuming userId is stored locally
-    //       setUserId(userId);  // Set userId state
-    //       if (userId) {
-    //         dispatch(fetchTasks(userId));
-    //       }
-    //     };
-    
-    //     fetchUserTasks();
-        
-    //   }, [dispatch]);
-    
-    // useEffect(() => {
-    //     const unsubscribe = navigation.addListener('focus', () => {
-    //     //   dispatch(fetch_tasks());
-    //     });
-    //     return unsubscribe;
-    //   }, [navigation, dispatch, "4hHb1KS5l0fqi9EOe4H9GmHufcn1"]);
+const Home = ({ navigation, route }: RouterProps) => {
+    const { userId } = route.params;
+    const tasks = useSelector((state: RootState) => state.tasks.tasks);
     const dispatch: AppDispatch = useDispatch();
 
-useEffect(() => {
-  dispatch(fetchTasks());
-}, [dispatch]);
+    useEffect(() => {
+        if (userId) {
+            dispatch(fetch_tasks(userId));
+        }
 
-const tasks = useSelector((state: RootState) => state.task.tasks);
+    }, [dispatch, userId]);
 
-useEffect(() => {
-    console.log('Tasks from HOMEEEE:', tasks);
-
-}, [tasks]);
-
-
-    //   console.log('TASOOSSS', tasks)
-
-    // const addTask = (task: ToDoTask) => {
-    //     setTasks([...tasks, task]);
-    // };
-
-    // const updateTask = (updatedTask: ToDoTask) => {
-    //     setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
-    // };
-
-    // const deleteTask = (taskId: number) => {
-    //     setTasks(tasks.filter(task => task.id !== taskId));  
-    // };
-    // const handleAddTask = (task) => {
-    //     dispatch(addTask(userId, task));  // Dispatch action to add task
-    // };
-
-    // const handleUpdateTask = (task) => {
-    //     dispatch(updateTask(userId, task));  // Dispatch action to update task
-    // };
 
     const handleDeleteTask = (taskId) => {
-        dispatch(deleteTask(taskId));  // Dispatch action to delete task
+        dispatch(deleteTask({taskId, userId})); 
     };
-    
-    // const toggleTaskCompletion = (id: number) => {
-    //     setTasks(tasks.map(task =>
-    //         task.id === id ? { ...task, completed: !task.completed } : task
-    //     ));
-    // };
 
     const handleToggleTaskCompletion = async (taskId: string, completed: boolean) => {
-        // Dispatch action
-        const actionResult = await dispatch(toggleTaskCompletion(taskId));
-    
-        // If the action was not successful, revert the local state
+        const actionResult = await dispatch(toggleTaskCompletion({taskId, userId}));
         if (toggleTaskCompletion.rejected.match(actionResult)) {
           return !completed;
         }
-    
         return completed;
-      };
-    
-    
-    const renderTaskItem = ({ item }) => (
-        console.log('ITEM', item),
-        <View style={styles.taskItem}>
-            <TouchableOpacity onPress={() => navigation.navigate('EditTask', { task: item, mode: 'edit'})}>
-                <View style={styles.taskTextContainer}>
-                    <Text style={[styles.taskTitle, item.completed && styles.taskTitleCompleted]}>
-                        {item.title}
-                    </Text>
-                    <Text style={styles.taskId}>{item.id}</Text>
-                </View>
-            </TouchableOpacity>
-            
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={() => handleToggleTaskCompletion(item.id, item.completed)} >
-                    {item.completed ? (
-                        <Ionicons name="checkmark-circle" size={24} color="green" />
-                    ) : (
-                        <Ionicons name="ellipse-outline" size={24} color="gray" />
-                    )}
-                </TouchableOpacity>
+    };
 
-                <TouchableOpacity onPress={() => handleDeleteTask(item.id)}>
-                    <Ionicons name="trash-outline" size={24} color="red" style={styles.deleteIcon} />
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
-
-    // if (loading) {
-    //     return <ActivityIndicator size="large" color="#0000ff" />;
-    // }
-
-    // if (error) {
-    //     return (
-    //       <View>
-    //         <Text>Error: {error}</Text>
-    //         <Button title="Retry" onPress={() => dispatch(fetchTasks("4hHb1KS5l0fqi9EOe4H9GmHufcn1"))} />
-    //       </View>
-    //     );
-    //   }
-
-    const logout = async () => {
-        try {
-            await FIREBASE_AUTH.signOut();
-            await AsyncStorage.removeItem('userId');
-            navigation.navigate('Login');
-        } catch (e) {
-            console.error(e);
-        }
+    const handleLogout = () => {
+        dispatch(logoutUser()); 
     };
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.backButton} onPress={logout}>
+            <TouchableOpacity style={styles.backButton} onPress={handleLogout}>
                 <Ionicons name="log-out-outline" size={24} color="white" />
             </TouchableOpacity>
 
             <FlatList
                 data={tasks}
-                renderItem={renderTaskItem}
-                keyExtractor={(item) => item && item.id ? item.id.toString() : ''}
+                renderItem={({ item }) => (
+                    <TaskItem 
+                        item={item} 
+                        navigation={navigation} 
+                        handleToggleTaskCompletion={handleToggleTaskCompletion}
+                        handleDeleteTask={handleDeleteTask}
+                        userId={userId} 
+                    />
+                )}
+                keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContent}
             />
 

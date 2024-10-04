@@ -1,84 +1,39 @@
+import React, { useState, useEffect } from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Login from './src/screens/Login';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import {User} from 'firebase/auth';
-import React, { useState, useEffect } from 'react';
+import InsideLayout from './src/navigation/InsideLayout';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import Home from './src/screens/Home';
-import TaskForm from './src/screens/TaskForm';
-import { Provider, useDispatch, useSelector } from 'react-redux';
-import store from './src/redux/store'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ActivityIndicator } from 'react-native';
+import { Provider } from 'react-redux';
+import store from './src/redux/store';
 
 const Stack = createNativeStackNavigator();
 
-const InsideStack = createNativeStackNavigator();
-
-function InsideLayout() {
-  return (
-      <InsideStack.Navigator>
-        <InsideStack.Screen 
-          name="My todos" 
-          component={Home}
-          options={{headerShown: false}} 
-        />
-        <InsideStack.Screen 
-          name="CreateTask" 
-          component={TaskForm}  
-          initialParams={{ mode: 'create' }} 
-          options={{ 
-            title: 'Create New Task', 
-            presentation: 'modal',   
-            animation: 'slide_from_bottom'
-          }}
-        />
-        <InsideStack.Screen 
-          name="EditTask" 
-          component={TaskForm}  
-          options={{ 
-            title: 'Edit Task', 
-            presentation: 'modal',   
-            animation: 'slide_from_bottom',
-          }}
-        />
-      </InsideStack.Navigator>
-  );
-}
-
-export const App = () => {
-  // const user = useSelector(state => state.user);
-  // const dispatch = useDispatch();
-
-  // useEffect(() => {
-  //   onAuthStateChanged(FIREBASE_AUTH, (user) => {
-  //     console.log('User:', user);
-  //     dispatch({ type: 'SET_USER', payload: user})
-  //   });
-  //   }, []);
-
-  const [userId, setUserId] = useState(null);
+const App = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const checkUserCredentials = async () => {
-    const storedUserId = await AsyncStorage.getItem('userCredential');
-    console.log('storedUserId:', storedUserId); // Add logging here
-    setUserId(storedUserId);
-  };
+    const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, async (user) => {
+      if (user) {
+        const userId = user.uid;
+        await AsyncStorage.setItem('userId', userId);
+        setUserId(userId);
+      } else {
+        await AsyncStorage.removeItem('userId');
+        setUserId(null);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
-    if (user) {
-      console.log('user.uid TUKKKKKKK:', user.uid); // Add logging here
-      setUserId(user.uid);
-    }
-  });
-
-  checkUserCredentials();
-
-  return () => unsubscribe();
-}, []);
-
-console.log('userId:', userId); // Add logging here
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   return (
     <Provider store={store}>
@@ -88,20 +43,19 @@ console.log('userId:', userId); // Add logging here
             <Stack.Screen 
               name="InsideLayout" 
               component={InsideLayout} 
-              options={{headerShown: false}}
+              options={{ headerShown: false }}
+              initialParams={{ userId }}
             />
           ) : (
             <Stack.Screen 
               name="Login" 
               component={Login} 
-              options={{headerShown: false}} 
+              options={{ headerShown: false }} 
             />
-
           )}
         </Stack.Navigator>
       </NavigationContainer>
-      </Provider>
+    </Provider>
   );
-}
-
+};
 export default App;

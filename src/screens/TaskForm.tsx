@@ -3,15 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import ToDoTask from '../models/Task';
-import { addTask, updateTask } from '../redux/actions';
+import { addTask, updateTask } from '../redux/tasks/tasks.actions';
 import { AppDispatch } from '../redux/store';
-// import { addTask} from '../redux/tasks/taskActions';
+import uuid from 'react-native-uuid';
 
 interface TaskFormProps {
     navigation: NavigationProp<any, any>;
-    route: RouteProp<{ params: { task?: { id: number; title: string; details: string; completed: boolean }; mode: 'edit' | 'create' } }, 'params'>;
-    addTask?: (task: { title: string; details: string; id: number; completed: boolean }) => void;
-    updateTask?: (task: { id: number; title: string; details: string }) => void;
+    route: RouteProp<{ params: { task?: { id: string; title: string; details: string; completed: boolean }; mode: 'edit' | 'create' } }, 'params'>;
 }
 
 const TaskForm = ({ navigation, route }: TaskFormProps) => {
@@ -19,7 +17,6 @@ const TaskForm = ({ navigation, route }: TaskFormProps) => {
     const [title, setTitle] = useState('');
     const [details, setDetails] = useState('');
     const dispatch: AppDispatch = useDispatch();
-    console.log("TaskForm userId 11111", userId);
 
     useEffect(() => {
         if (mode === 'edit' && task) {
@@ -28,32 +25,31 @@ const TaskForm = ({ navigation, route }: TaskFormProps) => {
         }
     }, [mode, task]);
 
-    const handleAddTask = (newTask: ToDoTask) => {
-        dispatch(addTask(newTask));
+    const handleAddTask = (task: ToDoTask) => {
+        console.log("userId in handleAddTask", userId);
+        dispatch(addTask({task, userId}));
     };
 
     const handleEditTask = (updatedTask: ToDoTask) => {
-        dispatch(updateTask(updatedTask));
+        console.log("userId in handleEditTask", userId);
+        dispatch(updateTask({updatedTask, userId}));
     };
 
     const saveTask = async () => {
         if (title && details) {
             if (mode === 'create') {
                 const newTask = {
-                    id: Date.now().toString(), 
+                    id: uuid.v4().toString(), 
                     title: title,
                     details: details,
                     completed: false
                 };
                 handleAddTask(newTask);
-                
-                //await dispatch(addTask(userId, newTask));  // Use dispatch here
-                // addTask && addTask(newTask);  
+
             } else if (mode === 'edit') {
                 const updatedTask = { ...task, title, details };
                 console.log("Updated task", updatedTask);
                 handleEditTask(updatedTask);
-                // updateTask && updateTask(updatedTask); 
             }
             if (navigation.canGoBack()) {
                 navigation.goBack();

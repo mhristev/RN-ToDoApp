@@ -1,11 +1,11 @@
-import { Action, AnyAction, combineReducers } from "redux";
-import tasksSlice from "./tasksSlice";
+import tasksSlice from "./tasks/tasks.slice";
 import { configureStore } from "@reduxjs/toolkit";
-import thunk, { ThunkAction } from "redux-thunk";
+import userSlice from "./user/user.slice";
 
 const store = configureStore({
     reducer: {
-      task : tasksSlice,
+      tasks : tasksSlice,
+      user : userSlice,
     }
 });
 
