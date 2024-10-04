@@ -84,14 +84,10 @@ class FirestoreService {
     }
 
     static async updateTask(updatedTask: ToDoTask, userId: string): Promise<ToDoTask[]> {
-        console.log("Updated task in Firestore2222");
-        console.log(updatedTask);
-        console.log(userId);
         const userDocRef = doc(FIREBASE_DB, 'Users', userId);
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
-            console.log("User document exists");
             const tasks = userDocSnap.data().tasks;
             const taskIndex = tasks.findIndex((task: ToDoTask) => task.id === updatedTask.id);
 

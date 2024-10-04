@@ -12,8 +12,14 @@ interface TaskFormProps {
     route: RouteProp<{ params: { task?: { id: string; title: string; details: string; completed: boolean }; mode: 'edit' | 'create' } }, 'params'>;
 }
 
+interface RouteParams {
+    userId: string;
+    task?: { id: string; title: string; details: string; completed: boolean };
+    mode: 'edit' | 'create';
+  }
+
 const TaskForm = ({ navigation, route }: TaskFormProps) => {
-    const { userId, task, mode} = route.params as unknown as { userId: string; task?: { id: string; title: string; details: string; completed: boolean }; mode: 'edit' | 'create' };
+    const { userId, task, mode } = route.params as RouteParams;
     const [title, setTitle] = useState('');
     const [details, setDetails] = useState('');
     const dispatch: AppDispatch = useDispatch();
@@ -26,12 +32,10 @@ const TaskForm = ({ navigation, route }: TaskFormProps) => {
     }, [mode, task]);
 
     const handleAddTask = (task: ToDoTask) => {
-        console.log("userId in handleAddTask", userId);
         dispatch(addTask({task, userId}));
     };
 
     const handleEditTask = (updatedTask: ToDoTask) => {
-        console.log("userId in handleEditTask", userId);
         dispatch(updateTask({updatedTask, userId}));
     };
 
@@ -45,10 +49,8 @@ const TaskForm = ({ navigation, route }: TaskFormProps) => {
                     completed: false
                 };
                 handleAddTask(newTask);
-
             } else if (mode === 'edit') {
                 const updatedTask = { ...task, title, details };
-                console.log("Updated task", updatedTask);
                 handleEditTask(updatedTask);
             }
             if (navigation.canGoBack()) {
@@ -58,8 +60,6 @@ const TaskForm = ({ navigation, route }: TaskFormProps) => {
             alert('Please fill out both fields.');
         }
     };
-
-
 
     return (
         <View style={styles.container}>

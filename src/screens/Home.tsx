@@ -18,10 +18,15 @@ const Home = ({ navigation, route }: RouterProps) => {
     const dispatch: AppDispatch = useDispatch();
 
     useEffect(() => {
-        if (userId) {
-            dispatch(fetch_tasks(userId));
-        }
+        const fetchTasks = async () => {
+            try {
+                await dispatch(fetch_tasks(userId));
+            } catch (error) {
+                console.error(error);
+            }
+        };
 
+        fetchTasks();
     }, [dispatch, userId]);
 
 
