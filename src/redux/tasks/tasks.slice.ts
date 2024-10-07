@@ -1,6 +1,7 @@
-import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { addTask, deleteTask, fetch_tasks, toggleTaskCompletion, updateTask } from "./tasks.actions"
-import ToDoTask from "../../models/Task";
+import ToDoTask from "../../models/ToDoTask";
+import APP_CONSTANTS from "../../constants";
 
 
 const initialState = {
@@ -8,7 +9,7 @@ const initialState = {
 };
 
 const tasksSlice = createSlice({
-  name: 'tasks',
+  name: APP_CONSTANTS.SLICE_NAME_TASKS,
   initialState: initialState,
   reducers: {
 
@@ -37,4 +38,4 @@ const tasksSlice = createSlice({
   }
 });
 
-export default tasksSlice.reducer;
+export default tasksSlice;

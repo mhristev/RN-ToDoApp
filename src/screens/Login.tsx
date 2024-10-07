@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ActivityIndicator, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
-import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { AppDispatch, RootState } from '../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { signInUser, signUpUser } from '../redux/user/user.actions';

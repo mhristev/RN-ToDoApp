@@ -1,6 +1,7 @@
-import ToDoTask from "../../models/Task";
+import ToDoTask from "../../models/ToDoTask";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import FirestoreService from "../../services/FirestoreService";
+import APP_CONSTANTS from "../../constants";
 
 interface MyErrorType {
   message: string;
@@ -8,7 +9,7 @@ interface MyErrorType {
 }
 
 export const fetch_tasks = createAsyncThunk<ToDoTask[], string, { rejectValue: MyErrorType }>(
-  'tasks/fetchTasks',
+  APP_CONSTANTS.FETCH_TASKS,
   async (userId, { rejectWithValue }) => {
     try {
         return await FirestoreService.fetchTasks(userId);
@@ -22,7 +23,7 @@ export const fetch_tasks = createAsyncThunk<ToDoTask[], string, { rejectValue: M
 );
 
 export const deleteTask = createAsyncThunk<ToDoTask[],{taskId: string, userId: string}, { rejectValue: MyErrorType }>(
-    'tasks/deleteTask',
+    APP_CONSTANTS.DELETE_TASK,
     async ({taskId, userId}, { rejectWithValue }) => {
       try {
         return FirestoreService.deleteTask(taskId, userId);
@@ -36,7 +37,7 @@ export const deleteTask = createAsyncThunk<ToDoTask[],{taskId: string, userId: s
   );
 
 export const addTask = createAsyncThunk<ToDoTask[], {task: ToDoTask, userId: string}, { rejectValue: MyErrorType }>(
-    'tasks/addTask',
+    APP_CONSTANTS.ADD_TASK,
     async ({task, userId}, { rejectWithValue }) => {
       try {
         return FirestoreService.addTask(task, userId);
@@ -50,7 +51,7 @@ export const addTask = createAsyncThunk<ToDoTask[], {task: ToDoTask, userId: str
   );
 
 export const updateTask = createAsyncThunk<ToDoTask[],{ updatedTask:ToDoTask, userId: string }, { rejectValue: MyErrorType }>(
-    'tasks/updateTask',
+    APP_CONSTANTS.UPDATE_TASK,
     async ({ updatedTask, userId }, { rejectWithValue }) => {
         try {
           return FirestoreService.updateTask(updatedTask, userId);
@@ -65,7 +66,7 @@ export const updateTask = createAsyncThunk<ToDoTask[],{ updatedTask:ToDoTask, us
 );
 
 export const toggleTaskCompletion = createAsyncThunk<ToDoTask, {taskId: string, userId: string }, { rejectValue: MyErrorType }>(
-    'tasks/toggleTaskCompletion',
+    APP_CONSTANTS.TOGGLE_TASK_COMPLETION,
     async ({ taskId, userId }, { rejectWithValue }) => {
         try {
             return FirestoreService.toggleTaskCompletion(taskId, userId);

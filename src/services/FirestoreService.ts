@@ -1,36 +1,45 @@
-// src/services/FirebaseRepository.ts
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FirebaseConfig';
-import ToDoTask from '../models/Task';
+import ToDoTask from '../models/ToDoTask';
+import APP_CONSTANTS from '../constants';
 
 class FirestoreService {
     static async signIn(email: string, password: string): Promise<string> {
-        const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
-        const userId = userCredential.user.uid;
-        await AsyncStorage.setItem('userId', userId);
-        return userId;
+        try {
+            const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+            const userId = userCredential.user.uid;
+            await AsyncStorage.setItem(APP_CONSTANTS.STORAGE_KEY_USER_ID, userId);
+            return userId;
+        } catch (error) {
+            throw error;
+        }
+
     };
     
     static async signUp(email: string, password: string): Promise<string> {
-        const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
-        const userId = userCredential.user.uid;
-        await AsyncStorage.setItem('userId', userId);
-    
-        const userDocRef = doc(FIREBASE_DB, 'Users', userId);
-        const userDocSnap = await getDoc(userDocRef);
-    
-        if (!userDocSnap.exists()) {
-            await setDoc(userDocRef, { userId: userId });
+        try {
+            const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+            const userId = userCredential.user.uid;
+            await AsyncStorage.setItem(APP_CONSTANTS.STORAGE_KEY_USER_ID, userId);
+        
+            const userDocRef = doc(FIREBASE_DB, 'Users', userId);
+            const userDocSnap = await getDoc(userDocRef);
+                
+            if (!userDocSnap.exists()) {
+                await setDoc(userDocRef, { userId: userId });
+            }
+        
+            return userId;
+        } catch (error) {
+            throw error;
         }
-    
-        return userId;
     };
     
     static async logout(): Promise<void> {
         await signOut(FIREBASE_AUTH);
-        await AsyncStorage.removeItem('userId');
+        await AsyncStorage.removeItem(APP_CONSTANTS.STORAGE_KEY_USER_ID);
     };
 
     static async fetchTasks(userId: string): Promise<ToDoTask[]> {

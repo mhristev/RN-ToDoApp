@@ -1,12 +1,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import 'firebase/firestore';
 import FirestoreService from '../../services/FirestoreService';
+import APP_CONSTANTS from '../../constants';
 
 export const signInUser = createAsyncThunk(
-    'user/signInUser',
+    APP_CONSTANTS.SIGN_IN_USER,
     async ({ email, password }: { email: string, password: string }, { rejectWithValue }) => {
       try {
-        const userId = FirestoreService.signIn(email, password);
+        const userId = await FirestoreService.signIn(email, password);
         return userId;
       } catch (error) {
         return rejectWithValue(error.message);
@@ -15,10 +16,10 @@ export const signInUser = createAsyncThunk(
   );
   
   export const signUpUser = createAsyncThunk(
-    'user/signUpUser',
+    APP_CONSTANTS.SIGN_UP_USER,
     async ({ email, password }: { email: string, password: string }, { rejectWithValue }) => {
       try {
-        const userId = await FirestoreService.signUp(email, password);
+        const userId = await await FirestoreService.signUp(email, password);
         return userId;
       } catch (error) {
         return rejectWithValue(error.message);
@@ -27,10 +28,10 @@ export const signInUser = createAsyncThunk(
   );
 
   export const logoutUser = createAsyncThunk(
-    'user/logoutUser',
+    APP_CONSTANTS.LOGOUT_USER,
     async (_, { rejectWithValue }) => {
       try {
-        await FirestoreService.logout();
+        await await FirestoreService.logout();
       } catch (error) {
         return rejectWithValue(error.message);
       }

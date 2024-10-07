@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import APP_CONSTANTS from '../constants';
 
 const TaskItem = ({ item, navigation, handleToggleTaskCompletion, handleDeleteTask, userId }) => (
     <View style={styles.taskItem}>
-        <TouchableOpacity onPress={() => navigation.navigate('EditTask', { task: item, mode: 'edit', userId })}>
+        <TouchableOpacity onPress={() => navigation.navigate(APP_CONSTANTS.STACK_NAVIGATION_SCREEN_EDIT_TASK, { task: item, mode: APP_CONSTANTS.TASK_FORM_MODE_EDIT, userId })}>
             <View style={styles.taskTextContainer}>
                 <Text style={[styles.taskTitle, item.completed && styles.taskTitleCompleted]}>
                     {item.title}

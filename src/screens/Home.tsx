@@ -7,9 +7,12 @@ import { deleteTask, fetch_tasks, toggleTaskCompletion } from '../redux/tasks/ta
 import { AppDispatch, RootState } from '../redux/store';
 import { logoutUser } from '../redux/user/user.actions';
 import TaskItem from '../components/TaskItem';
+import { RootStackParamList } from '../types/navigationTypes';
+import APP_CONSTANTS from '../constants';
+
 interface RouterProps {
     navigation: NavigationProp<any, any>;
-    route: RouteProp<any, any>;
+    route: RouteProp<RootStackParamList, 'Home'>;
 }
 
 const Home = ({ navigation, route }: RouterProps) => {
@@ -69,7 +72,7 @@ const Home = ({ navigation, route }: RouterProps) => {
 
             <TouchableOpacity 
                 style={styles.fab} 
-                onPress={() => navigation.navigate('CreateTask', { mode: 'create', userId })}  // Pass 'create' mode here
+                onPress={() => navigation.navigate('CreateTask', { mode: APP_CONSTANTS.TASK_FORM_MODE_CREATE, userId })}  // Pass 'create' mode here
             >
                 <Ionicons name="add" size={24} color="white" />
             </TouchableOpacity>
