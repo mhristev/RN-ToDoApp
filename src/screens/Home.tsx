@@ -67,6 +67,7 @@ const Home = ({ navigation, route }: RouterProps) => {
                     />
                 )}
                 keyExtractor={(item) => item.id}
+                extraData={(item) => item.completed}
                 contentContainerStyle={styles.listContent}
             />
 
